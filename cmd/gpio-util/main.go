@@ -83,6 +83,8 @@ func run() int {
 				return 1
 			}
 		}
+
+		return 0
 	}
 
 	flag.Usage()
