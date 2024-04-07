@@ -1,4 +1,4 @@
-package driver
+package gpiodriver
 
 import (
 	"errors"
@@ -11,6 +11,7 @@ import (
 	"github.com/warthog618/go-gpiocdev"
 	"periph.io/x/conn/v3"
 	"periph.io/x/conn/v3/gpio"
+	"periph.io/x/conn/v3/gpio/gpioreg"
 	"periph.io/x/conn/v3/physic"
 	"periph.io/x/conn/v3/pin"
 	"periph.io/x/conn/v3/pin/pinreg"
@@ -68,6 +69,13 @@ func RegisterChip(name string, options ...gpiocdev.ChipOption) error {
 
 	if err := pinreg.Register(strings.ToUpper(name), [][]pin.Pin{pins}); err != nil {
 		return fmt.Errorf("failed to register gpiochip %q: %w", name, err)
+	}
+
+	for _, pin := range pins {
+		adapter := pin.(*pinAdapter)
+		if err := gpioreg.Register(adapter); err != nil {
+			return fmt.Errorf("failed to register pin %q: %w", adapter.Name(), err)
+		}
 	}
 
 	return nil
@@ -369,6 +377,7 @@ func (p *pinAdapter) Read() gpio.Level {
 	// The GPIO package just returns Low if the pin is not opened yet.
 	// https://github.com/periph/host/blob/522a3cb6e99e9649daf291bfb7b097219409a813/bcm283x/gpio.go#L478
 	if pin == nil {
+		p.logger.Error("reading from unopened pin")
 		return gpio.Low
 	}
 
