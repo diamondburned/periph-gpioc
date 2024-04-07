@@ -101,7 +101,7 @@ func newPinAdapter(chip *gpiocdev.Chip, info gpiocdev.LineInfo, logger *slog.Log
 	p := &pinAdapter{
 		logger: logger,
 		chip:   chip,
-		edge:   make(chan struct{}),
+		edge:   make(chan struct{}, 1),
 	}
 	p.info.Store(&info)
 	return p
@@ -402,16 +402,13 @@ func (p *pinAdapter) Read() gpio.Level {
 	return gpio.Level(itob(b))
 }
 
-func (p *pinAdapter) ReadFast() gpio.Level {
-	pin := p.line.Load()
-	if pin == nil {
-		return gpio.Low
-	}
-	v, _ := pin.Value()
-	return gpio.Level(itob(v & 0b1))
-}
-
 func (p *pinAdapter) WaitForEdge(timeout time.Duration) bool {
+	// Drain any existing edge first.
+	select {
+	case <-p.edge:
+	default:
+	}
+
 	if timeout < 0 {
 		<-p.edge
 		return true
