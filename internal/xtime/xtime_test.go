@@ -16,3 +16,9 @@ func BenchmarkTimer(b *testing.B) {
 		time.NewTimer(0).Stop()
 	}
 }
+
+func BenchamrkSleepLatency(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		time.Sleep(1)
+	}
+}
