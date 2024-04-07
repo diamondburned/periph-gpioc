@@ -35,3 +35,25 @@ func main() {
 > Here, we skipped using `host.Init()` from
 > [periph.io/x/host](https://periph.io/x/host) and instead call our
 > `gpiodriver.Register()`. Calling both may cause conflicts.
+
+## Benchmarks
+
+Benchmarks are done using a Raspberry 4 running NixOS on ARM.
+
+```
+[root@bridget:~/periph-gpiod]# PIN=GPIO26 go test -bench=. -v ./gpiodriver/
+goos: linux
+goarch: arm64
+pkg: libdb.so/periph-gpioc/gpiodriver
+BenchmarkPinAdapter
+BenchmarkPinAdapter/In
+BenchmarkPinAdapter/In-4         	 202306	     5367 ns/op
+BenchmarkPinAdapter/In/Read
+BenchmarkPinAdapter/In/Read-4    	 882184	     1358 ns/op
+BenchmarkPinAdapter/In/ReadFast
+BenchmarkPinAdapter/In/ReadFast-4         	 879189	     1341 ns/op
+BenchmarkPinAdapter/Out
+BenchmarkPinAdapter/Out-4                 	 507764	     2149 ns/op
+PASS
+ok  	libdb.so/periph-gpioc/gpiodriver	4.697s
+```
