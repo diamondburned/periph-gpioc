@@ -390,23 +390,25 @@ func (p *pinAdapter) Read() gpio.Level {
 		return gpio.Low
 	}
 
-	// TODO: convert to free cast.
-	switch v {
-	case 0:
-		return gpio.Low
-	case 1:
-		return gpio.High
-	default:
-		p.logger.Error(
+	// Check if any other bits are set. If they are, then we're not handling
+	// them and should raise a warning about it.
+	b := v & 0b1
+	if v != b {
+		p.logger.Warn(
 			"kernel returned invalid non-boolean value",
 			"value", v)
-		return gpio.Low
 	}
+
+	return gpio.Level(itob(b))
 }
 
 func (p *pinAdapter) ReadFast() gpio.Level {
-	// TODO: Try to make it faster? Not sure how.
-	return p.Read()
+	pin := p.line.Load()
+	if pin == nil {
+		return gpio.Low
+	}
+	v, _ := pin.Value()
+	return gpio.Level(itob(v & 0b1))
 }
 
 func (p *pinAdapter) WaitForEdge(timeout time.Duration) bool {
@@ -493,10 +495,12 @@ func (p *pinAdapter) PWM(duty gpio.Duty, f physic.Frequency) error {
 }
 
 func itob(i int) bool {
-	if i == 0 {
-		return false
+	// Use one of the optimization patterns.
+	// See https://github.com/golang/go/issues/6011.
+	if i == 1 {
+		return true
 	}
-	return true
+	return false
 }
 
 func btoi(b bool) int {
