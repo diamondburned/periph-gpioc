@@ -5,7 +5,8 @@ import (
 	"log/slog"
 	"os"
 
-	"libdb.so/periph-gpioc/driver"
+	"libdb.so/periph-gpioc/gpiodriver"
+	"libdb.so/periph-gpioc/internal/xcli"
 )
 
 var jsonOutput bool
@@ -14,19 +15,18 @@ func main() {
 	flag.BoolVar(&jsonOutput, "json", false, "output logs in JSON format")
 	flag.Parse()
 
-	opts := &slog.HandlerOptions{Level: slog.LevelDebug}
-
-	var logHandler slog.Handler
 	if jsonOutput {
-		logHandler = slog.NewJSONHandler(os.Stdout, opts)
+		slog.SetDefault(slog.New(slog.NewJSONHandler(
+			os.Stdout,
+			&slog.HandlerOptions{Level: slog.LevelDebug})))
 	} else {
-		logHandler = slog.NewTextHandler(os.Stdout, opts)
+		slog.SetDefault(xcli.NewColoredLogger(
+			os.Stdout,
+			slog.LevelDebug))
 	}
 
-	logger := slog.New(logHandler)
-	slog.SetDefault(logger)
-
-	if err := driver.Register(); err != nil {
-		logger.Error("failed to register gpiochips", "err", err)
+	if err := gpiodriver.Register(); err != nil {
+		slog.Error("failed to register gpiochips", "err", err)
+		os.Exit(1)
 	}
 }
