@@ -10,3 +10,9 @@ func BenchmarkNow(b *testing.B) {
 		time.Now()
 	}
 }
+
+func BenchmarkTimer(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		time.NewTimer(0).Stop()
+	}
+}
