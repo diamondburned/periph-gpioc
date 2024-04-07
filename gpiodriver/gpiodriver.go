@@ -417,10 +417,8 @@ func (p *pinAdapter) WaitForEdge(timeout time.Duration) bool {
 		return true
 	}
 
-	// If we're waiting for less than 10 microseconds, busy wait.
-	const busyThreshold = 10 * time.Microsecond
-
-	if timeout < busyThreshold {
+	// If we're waiting for less than 100µs, just busy wait.
+	if timeout < 1*time.Microsecond {
 		// Busy wait.
 		deadline := time.Now().Add(timeout)
 		for time.Now().Before(deadline) {
