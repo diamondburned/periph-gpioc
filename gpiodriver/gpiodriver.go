@@ -424,8 +424,10 @@ func (p *pinAdapter) WaitForEdge(timeout time.Duration) bool {
 		// Busy wait.
 		deadline := time.Now().Add(timeout)
 		for time.Now().Before(deadline) {
-			if p.Read() == gpio.High {
+			select {
+			case <-p.edge:
 				return true
+			default:
 			}
 		}
 		return false
