@@ -54,6 +54,12 @@ func RegisterChip(name string, options ...gpiocdev.ChipOption) error {
 			"line.drive", info.Config.Drive,
 			"line.bias", info.Config.Bias,
 			"line.edge", info.Config.EdgeDetection)
+
+		if info.Name == "" {
+			logger.Debug("skipping line without name")
+			continue
+		}
+
 		logger.Debug("found line")
 
 		pins = append(pins, &pinAdapter{
