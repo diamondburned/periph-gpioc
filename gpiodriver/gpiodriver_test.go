@@ -38,13 +38,6 @@ func BenchmarkPinAdapter(b *testing.B) {
 		}
 	})
 
-	b.Run("In/ReadFast", func(b *testing.B) {
-		fastReader := pin.(interface{ ReadFast() gpio.Level })
-		for i := 0; i < b.N; i++ {
-			fastReader.ReadFast()
-		}
-	})
-
 	b.Run("Out", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			if err := pin.Out(gpio.Low); err != nil {
