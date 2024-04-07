@@ -101,7 +101,7 @@ func newPinAdapter(chip *gpiocdev.Chip, info gpiocdev.LineInfo, logger *slog.Log
 	p := &pinAdapter{
 		logger: logger,
 		chip:   chip,
-		edge:   make(chan struct{}, 1),
+		edge:   make(chan struct{}),
 	}
 	p.info.Store(&info)
 	return p
