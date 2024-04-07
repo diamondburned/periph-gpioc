@@ -64,7 +64,7 @@ func RegisterChip(name string, options ...gpiocdev.ChipOption) error {
 		}
 
 		logger.Debug("found line")
-		pins = append(pins, newPinAdapter(chip, info))
+		pins = append(pins, newPinAdapter(chip, info, logger))
 	}
 
 	if err := pinreg.Register(strings.ToUpper(name), [][]pin.Pin{pins}); err != nil {
@@ -97,10 +97,11 @@ var (
 	_ gpio.PinOut   = (*pinAdapter)(nil)
 )
 
-func newPinAdapter(chip *gpiocdev.Chip, info gpiocdev.LineInfo) *pinAdapter {
+func newPinAdapter(chip *gpiocdev.Chip, info gpiocdev.LineInfo, logger *slog.Logger) *pinAdapter {
 	p := &pinAdapter{
-		chip: chip,
-		edge: make(chan struct{}, 1),
+		logger: logger,
+		chip:   chip,
+		edge:   make(chan struct{}, 1),
 	}
 	p.info.Store(&info)
 	return p
